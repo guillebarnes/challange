@@ -11,7 +11,7 @@ import java.util.List;
 @Service
 public class ProcesamientoService {
 
-    private static Long ESTADO_FINALIZADO = 2L;
+    private static Long ESTADO_PROCESADO = 2L;
     @Autowired
     private CarritoService carritoSvc;
 
@@ -27,7 +27,7 @@ public class ProcesamientoService {
             this.aplicarDescuentos(productos);
             CarritoEntity carritoEntity = carritoSvc.findById(idCarrito);
             carritoEntity.setCarritoProductos(productos);
-            carritoEntity.setEstado(estadoSvc.findById(ESTADO_FINALIZADO));
+            carritoEntity.setEstado(estadoSvc.findById(ESTADO_PROCESADO));
             carritoSvc.guardarCarrito(carritoEntity);
         }catch (Exception e){
             System.out.println("error: " + e.getMessage());
