@@ -93,18 +93,22 @@ public class CarritoService {
         return mapper.entityToDto(this.findById(idCarrito));
     }
 
-    public void eliminarUnidadDeProductoDelCarrito(Long idCarrito, ProductoSeleccionadoDTO producto){
+    public CarritoDTO eliminarUnidadDeProductoDelCarrito(Long idCarrito, ProductoSeleccionadoDTO producto){
         CarritoProductoId id = new CarritoProductoId(idCarrito, producto.getIdProducto());
         CarritoProductoEntity carritoProductoEntity = carritoProductoDao.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("No se encontró CarritoProducto con id " + idCarrito + " " + producto.getIdProducto()));
         //Resto 1 unidad a la cantidad
         Integer cantidad = carritoProductoEntity.getCantidad();
         if(cantidad > 1) {
+            Double nuevoSubtotal = this.calcularNuevoSubtotal(cantidad, carritoProductoEntity.getSubtotal());
             carritoProductoEntity.setCantidad(cantidad - 1);
+            carritoProductoEntity.setSubtotal(nuevoSubtotal);
             carritoProductoDao.save(carritoProductoEntity);
         }
         else
             this.eliminarProductoDelCarrito(idCarrito, producto);
+
+        return mapper.entityToDto(this.findById(idCarrito));
     }
     public List<CarritoProductoDTO> obtenerTodosLosProductosDeUnCarrito(Long idCarrito){
         List<CarritoProductoEntity> productos = this.findById(idCarrito).getCarritoProductos();
@@ -113,5 +117,9 @@ public class CarritoService {
 
     public void guardarCarrito(CarritoEntity entity){
         carritoDao.save(entity);
+    }
+
+    private Double calcularNuevoSubtotal(Integer cantidad, double subtotalOriginal){
+        return subtotalOriginal - (subtotalOriginal / cantidad);
     }
 }

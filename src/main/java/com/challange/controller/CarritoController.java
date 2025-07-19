@@ -105,8 +105,7 @@ public class CarritoController {
     @PatchMapping("/eliminar/{idCarrito}")
     public ResponseEntity<?> eliminarUnidadDeProductoDelCarrito(@PathVariable Long idCarrito, @RequestBody ProductoSeleccionadoDTO producto){
         try{
-            carritoSvc.eliminarUnidadDeProductoDelCarrito(idCarrito, producto);
-            return ResponseEntity.ok().build();
+            return ResponseEntity.ok().body(carritoSvc.eliminarUnidadDeProductoDelCarrito(idCarrito, producto));
         }
         catch (Exception e){
             System.out.println(e.getMessage());
