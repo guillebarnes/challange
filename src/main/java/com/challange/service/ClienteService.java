@@ -3,6 +3,7 @@ package com.challange.service;
 import com.challange.entity.ClienteEntity;
 import com.challange.repository.ClienteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
@@ -12,6 +13,7 @@ public class ClienteService {
     @Autowired
     private ClienteRepository dao;
 
+    @Cacheable(cacheNames = "clienteCache", key = "#id")
     public ClienteEntity findById(Long id){
         return dao.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("No se encontró UsuarioEntity con id " + id));

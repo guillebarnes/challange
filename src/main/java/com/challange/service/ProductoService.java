@@ -4,6 +4,7 @@ import com.challange.entity.ProductoEntity;
 import com.challange.repository.CarritoProductoRepository;
 import com.challange.repository.ProductoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
@@ -20,6 +21,7 @@ public class ProductoService {
     @Autowired
     private CarritoService carritoSvc;
 
+    @Cacheable(cacheNames = "productoCache", key = "#idProducto")
     public ProductoEntity findById(Long idProducto){
         return productoDao.findById(idProducto)
                 .orElseThrow(() -> new EntityNotFoundException("No se encontró producto asociado al id " + idProducto));
