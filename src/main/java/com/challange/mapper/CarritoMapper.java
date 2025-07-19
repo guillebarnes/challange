@@ -5,6 +5,7 @@ import com.challange.entity.CarritoEntity;
 import org.mapstruct.Mapper;
 
 import java.util.List;
+
 @Mapper(componentModel = "spring")
 public interface CarritoMapper {
     CarritoDTO entityToDto(CarritoEntity entity);

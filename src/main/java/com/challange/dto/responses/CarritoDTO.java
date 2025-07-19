@@ -5,6 +5,7 @@ import java.util.List;
 public class CarritoDTO {
     private Long carritoId;
     private ClienteDTO cliente;
+    private EstadoCarritoDTO estado;
 
     private List<CarritoProductoDTO> carritoProductos;
 
@@ -22,6 +23,14 @@ public class CarritoDTO {
 
     public void setCliente(ClienteDTO cliente) {
         this.cliente = cliente;
+    }
+
+    public EstadoCarritoDTO getEstado() {
+        return estado;
+    }
+
+    public void setEstado(EstadoCarritoDTO estado) {
+        this.estado = estado;
     }
 
     public List<CarritoProductoDTO> getCarritoProductos() {
