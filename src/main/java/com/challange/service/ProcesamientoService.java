@@ -25,10 +25,12 @@ public class ProcesamientoService {
             List<CarritoProductoEntity> productos = carritoProductoDao.obtenerTodosLosProductosDeUnCarrito(idCarrito);
             this.aplicarDescuentos(productos);
             CarritoEntity carritoEntity = carritoSvc.findById(idCarrito);
-            carritoEntity.setCarritoProductos(productos);
+            carritoEntity.getCarritoProductos().clear();
+            carritoEntity.getCarritoProductos().addAll(productos);
             carritoEntity.setEstado(estadoSvc.findById(ESTADO_PROCESADO));
             carritoSvc.guardarCarrito(carritoEntity);
         }catch (Exception e){
+            //TODO reempleazar sout con LOGGER
             System.out.println("error: " + e.getMessage());
         }
     }
