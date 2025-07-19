@@ -22,7 +22,6 @@ public class ProcesamientoService {
     private CarritoProductoRepository carritoProductoDao;
     public void finalizarCarrito(Long idCarrito){
         try {
-            Thread.sleep(10000L);
             List<CarritoProductoEntity> productos = carritoProductoDao.obtenerTodosLosProductosDeUnCarrito(idCarrito);
             this.aplicarDescuentos(productos);
             CarritoEntity carritoEntity = carritoSvc.findById(idCarrito);
