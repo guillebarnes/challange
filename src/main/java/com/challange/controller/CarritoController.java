@@ -58,7 +58,7 @@ public class CarritoController {
             return ResponseEntity.status(HttpStatus.CREATED).body(carritoSvc.crearCarrito(idCliente));
         }
         catch(Exception e){
-            //TODO: agregar Log4j
+            LOGGER.error("Error al crear un carrito para el cliente {}: {}", idCliente, e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
@@ -83,8 +83,7 @@ public class CarritoController {
             return ResponseEntity.ok(carritoSvc.finalizarCarrito(idCarrito));
         }
         catch(Exception e){
-            //TODO: agregar Log4j
-            System.out.println(e.getMessage());
+            LOGGER.error("Error al procesar el carrito id {}: {}", idCarrito, e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
@@ -97,7 +96,7 @@ public class CarritoController {
             return ResponseEntity.ok(new MensajeDTO(ex.getMessage()));
         }
         catch(Exception e){
-            System.out.println(e.toString());
+            LOGGER.error("Error al borrar el producto {} del carrito id {}. Motivo: {}", producto.getIdProducto(), idCarrito, e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
@@ -108,7 +107,7 @@ public class CarritoController {
             return ResponseEntity.ok().body(carritoSvc.eliminarUnidadDeProductoDelCarrito(idCarrito, producto));
         }
         catch (Exception e){
-            System.out.println(e.getMessage());
+            LOGGER.error("Error al intentar eliminar una unidad del producto {} del carrito id {}. Motivo: {}", producto.getIdProducto(), idCarrito, e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
