@@ -1,7 +1,16 @@
 insert into usuario (user,pass) values ('gino','1234');
 insert into cliente (nombre, apellido,user_id) values ('GUILLERMO','BARNES',1);
+insert into cliente (nombre, apellido) values ('JUAN','CARLOS');
+insert into cliente (nombre, apellido) values ('PEDRO','SANCHEZ');
+insert into cliente (nombre, apellido) values ('PRUEBA','ESTRES');
+insert into cliente (nombre, apellido) values ('BANCO','GALICIA');
 insert into estado_carrito (descripcion) values ('ABIERTO');
 insert into estado_carrito (descripcion) values ('PROCESADO');
 insert into categoria(DESCRIPCION ,DESCUENTO ) values ('CELULARES',10);
 INSERT INTO CATEGORIA (DESCRIPCION ,DESCUENTO ) values ('VARIOS',5);
+insert into categoria (DESCRIPCION ,DESCUENTO ) values ('ROPA', 15);
 INSERT INTO PRODUCTO (DESCRIPCION ,EN_PROMOCION ,PRECIO ,CATEGORIA_ID ) VALUES ('IPHONE 15', false, 1200, 1);
+INSERT INTO PRODUCTO (DESCRIPCION ,EN_PROMOCION ,PRECIO ,CATEGORIA_ID ) VALUES ('SAMSUNG GALAXY S20', true, 1000, 1);
+INSERT INTO PRODUCTO (DESCRIPCION ,EN_PROMOCION ,PRECIO ,CATEGORIA_ID ) VALUES ('CUBO RUBIK', false, 200, 2);
+INSERT INTO PRODUCTO (DESCRIPCION ,EN_PROMOCION ,PRECIO ,CATEGORIA_ID ) VALUES ('REMERA', false, 399, 3);
+INSERT INTO PRODUCTO (DESCRIPCION ,EN_PROMOCION ,PRECIO ,CATEGORIA_ID ) VALUES ('PANTALON', true, 450, 3);
