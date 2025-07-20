@@ -4,6 +4,7 @@ import com.challange.dto.requests.ProductoSeleccionadoDTO;
 import com.challange.dto.responses.CarritoDTO;
 import com.challange.dto.responses.CarritoProductoDTO;
 import com.challange.dto.responses.ClienteDTO;
+import com.challange.dto.responses.EstadoCarritoDTO;
 import com.challange.entity.*;
 import com.challange.entity.id.CarritoProductoId;
 import com.challange.mapper.CarritoMapper;
@@ -89,12 +90,16 @@ class CarritoServiceTest {
         productoSeleccionadoDTO.setCantidad(1);
 
         //Mockeo las entities
+        EstadoCarritoEntity estadoCarritoEntity = new EstadoCarritoEntity();
+        estadoCarritoEntity.setDescripcion("ABIERTO");
+
         ProductoEntity productoMock = new ProductoEntity();
         productoMock.setProductoId(idProducto);
         productoMock.setPrecio(100.0);
         productoMock.setEnPromocion(false);
 
         CarritoEntity carritoMock = new CarritoEntity();
+        carritoMock.setEstado(estadoCarritoEntity);
         carritoMock.setCarritoId(idCarrito);
         carritoMock.setCarritoProductos(new ArrayList<>());
 
@@ -128,9 +133,13 @@ class CarritoServiceTest {
         productoMock.setPrecio(100.0);
         productoMock.setEnPromocion(false);
 
+        EstadoCarritoEntity estadoCarritoEntity = new EstadoCarritoEntity();
+        estadoCarritoEntity.setDescripcion("ABIERTO");
+
         CarritoEntity carritoMock = new CarritoEntity();
         carritoMock.setCarritoId(idCarrito);
         carritoMock.setCarritoProductos(new ArrayList<>());
+        carritoMock.setEstado(estadoCarritoEntity);
 
         CarritoProductoEntity carritoProductoEntityMock = new CarritoProductoEntity();
         carritoProductoEntityMock.setId(new CarritoProductoId(idCarrito, idProducto));
@@ -180,9 +189,14 @@ class CarritoServiceTest {
         productoMock.setPrecio(100.0);
         productoMock.setEnPromocion(false);
 
+        EstadoCarritoEntity estadoCarritoEntity = new EstadoCarritoEntity();
+        estadoCarritoEntity.setId(1L);
+        estadoCarritoEntity.setDescripcion("ABIERTO");
+
         CarritoEntity carritoMock = new CarritoEntity();
         carritoMock.setCarritoId(idCarrito);
         carritoMock.setCarritoProductos(new ArrayList<>());
+        carritoMock.setEstado(estadoCarritoEntity);
 
         CarritoProductoEntity carritoProductoEntityMock = new CarritoProductoEntity();
         carritoProductoEntityMock.setId(new CarritoProductoId(idCarrito, idProducto));
@@ -197,9 +211,12 @@ class CarritoServiceTest {
 
         carritoMock.setCarritoProductos(carritoProductoEntityList);
 
+        EstadoCarritoDTO estadoCarritoDtoMock = new EstadoCarritoDTO();
+        estadoCarritoDtoMock.setDescripcion("VACIO");
+
         CarritoDTO carritoDtoMock = new CarritoDTO();
         carritoDtoMock.setCarritoId(idCarrito);
-
+        carritoDtoMock.setEstado(estadoCarritoDtoMock);
         carritoDtoMock.setCarritoProductos(new ArrayList<>());
 
         when(carritoRepository.findById(idCarrito)).thenReturn(Optional.of(carritoMock));
@@ -210,6 +227,7 @@ class CarritoServiceTest {
         CarritoDTO result = carritoSvc.eliminarUnidadDeProductoDelCarrito(idCarrito, productoSeleccionadoDTO);
 
         assertThat(result.getCarritoProductos().size()).isEqualTo(0);
+        assertThat(result.getEstado().getDescripcion()).isEqualTo("VACIO");
         assertThat(result.getCarritoProductos()).isEmpty();
     }
 
