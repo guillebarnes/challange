@@ -68,7 +68,7 @@ public class CarritoController {
         try{
             return ResponseEntity.status(HttpStatus.CREATED).body(carritoSvc.agregarProductoACarrito(idCarrito, producto));
         }
-        catch (EntityNotFoundException ex){
+        catch (RuntimeException ex){
             return ResponseEntity.ok(new MensajeDTO(ex.getMessage()));
         }
         catch(Exception e){
@@ -105,6 +105,9 @@ public class CarritoController {
     public ResponseEntity<?> eliminarUnidadDeProductoDelCarrito(@PathVariable Long idCarrito, @RequestBody ProductoSeleccionadoDTO producto){
         try{
             return ResponseEntity.ok().body(carritoSvc.eliminarUnidadDeProductoDelCarrito(idCarrito, producto));
+        }
+        catch (RuntimeException ex){
+            return ResponseEntity.ok(new MensajeDTO(ex.getMessage()));
         }
         catch (Exception e){
             LOGGER.error("Error al intentar eliminar una unidad del producto {} del carrito id {}. Motivo: {}", producto.getIdProducto(), idCarrito, e.getMessage());

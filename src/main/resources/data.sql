@@ -6,6 +6,7 @@ insert into cliente (nombre, apellido) values ('PRUEBA','ESTRES');
 insert into cliente (nombre, apellido) values ('BANCO','GALICIA');
 insert into estado_carrito (descripcion) values ('ABIERTO');
 insert into estado_carrito (descripcion) values ('PROCESADO');
+insert into estado_carrito (descripcion) values ('VACIO');
 insert into categoria(DESCRIPCION ,DESCUENTO ) values ('CELULARES',10);
 INSERT INTO CATEGORIA (DESCRIPCION ,DESCUENTO ) values ('VARIOS',5);
 insert into categoria (DESCRIPCION ,DESCUENTO ) values ('ROPA', 15);

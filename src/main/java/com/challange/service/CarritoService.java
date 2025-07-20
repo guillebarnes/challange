@@ -23,6 +23,7 @@ import java.util.List;
 public class CarritoService {
 
     private static final Long ESTADO_ABIERTO = 1L;
+    private static final Long ESTADO_VACIO = 3L;
     @Autowired
     private CarritoRepository carritoDao;
     @Autowired
@@ -43,7 +44,7 @@ public class CarritoService {
     public CarritoDTO crearCarrito(Long idCliente) {
         CarritoEntity entity = new CarritoEntity();
         entity.setCliente(usuarioSvc.findById(idCliente));
-        entity.setEstado(carritoEstadoSvc.findById(ESTADO_ABIERTO));
+        entity.setEstado(carritoEstadoSvc.findById(ESTADO_VACIO));
         CarritoEntity carritoEntity =  carritoDao.save(entity);
         return mapper.entityToDto(carritoEntity);
     }
@@ -58,6 +59,10 @@ public class CarritoService {
         return mapper.entitiesToDtos(entities);
     }
     public CarritoDTO agregarProductoACarrito(Long idCarrito, ProductoSeleccionadoDTO productoSeleccionado){
+        CarritoEntity carritoEntity = this.findById(idCarrito);
+        if(carritoEntity.getEstado().getDescripcion().equals("PROCESADO"))
+            throw new RuntimeException("No se puede agregar productos a un carrito procesado");
+
         //Construyo clave compuesta por id de carrito y id de producto
         CarritoProductoId id = new CarritoProductoId(idCarrito, productoSeleccionado.getIdProducto());
 
@@ -73,7 +78,11 @@ public class CarritoService {
         carritoProductoEntity.setSubtotal(productoEntity.getPrecio() * productoSeleccionado.getCantidad());
         carritoProductoDao.save(carritoProductoEntity);
 
-        return mapper.entityToDto(this.findById(idCarrito));
+        //Modifico el estado del carrito que ahora al tener un producto pasa a estar abierto
+        if (!carritoEntity.getCarritoProductos().isEmpty())
+            carritoEntity = this.actualizarEstadoDelCarrito(carritoEntity, ESTADO_ABIERTO);
+
+        return mapper.entityToDto(carritoEntity);
     }
 
     public MensajeDTO finalizarCarrito(Long idCarrito){
@@ -94,21 +103,30 @@ public class CarritoService {
     }
 
     public CarritoDTO eliminarUnidadDeProductoDelCarrito(Long idCarrito, ProductoSeleccionadoDTO producto){
+        CarritoEntity carritoEntity = this.findById(idCarrito);
+        if(carritoEntity.getEstado().getDescripcion().equals("VACIO") || carritoEntity.getEstado().getDescripcion().equals("PROCESADO"))
+            throw new RuntimeException("No se puede borrar productos de un carrito vacio o procesado");
+
         CarritoProductoId id = new CarritoProductoId(idCarrito, producto.getIdProducto());
         CarritoProductoEntity carritoProductoEntity = carritoProductoDao.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("No se encontró CarritoProducto con id " + idCarrito + " " + producto.getIdProducto()));
+                .orElseThrow(() -> new EntityNotFoundException("No se encontró CarritoProducto con id " + idCarrito + "-" + producto.getIdProducto()));
+
         //Resto 1 unidad a la cantidad
         Integer cantidad = carritoProductoEntity.getCantidad();
-        if(cantidad > 1) {
+
+
+        if (cantidad > 1) {
             Double nuevoSubtotal = this.calcularNuevoSubtotal(cantidad, carritoProductoEntity.getSubtotal());
             carritoProductoEntity.setCantidad(cantidad - 1);
             carritoProductoEntity.setSubtotal(nuevoSubtotal);
             carritoProductoDao.save(carritoProductoEntity);
-        }
-        else
+        } else {
             this.eliminarProductoDelCarrito(idCarrito, producto);
+            carritoEntity.setEstado(carritoEstadoSvc.findById(ESTADO_VACIO));
+            carritoDao.save(carritoEntity);
+        }
 
-        return mapper.entityToDto(this.findById(idCarrito));
+        return mapper.entityToDto(carritoEntity);
     }
     public List<CarritoProductoDTO> obtenerTodosLosProductosDeUnCarrito(Long idCarrito){
         List<CarritoProductoEntity> productos = this.findById(idCarrito).getCarritoProductos();
@@ -121,5 +139,10 @@ public class CarritoService {
 
     private Double calcularNuevoSubtotal(Integer cantidad, double subtotalOriginal){
         return subtotalOriginal - (subtotalOriginal / cantidad);
+    }
+
+    private CarritoEntity actualizarEstadoDelCarrito(CarritoEntity entity, Long estado){
+        entity.setEstado(carritoEstadoSvc.findById(estado));
+        return carritoDao.save(entity);
     }
 }
