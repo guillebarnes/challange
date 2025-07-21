@@ -58,7 +58,8 @@ public class CarritoServiceIntegrationTest {
         clienteEntity = clienteRepository.save(clienteEntity);
 
         CarritoDTO carritoDTO = carritoService.crearCarrito(clienteEntity.getId());
-        CarritoEntity carritoEntity = carritoService.findById(1L);
+
+        CarritoEntity carritoEntity = carritoService.findById(2L);
         assertThat(carritoDTO).isNotNull();
         assertThat(carritoDTO.getCliente().getApellido()).isEqualTo("TEST");
         assertThat(carritoDTO.getCliente().getNombre()).isEqualTo("INTEGRATION");
@@ -102,7 +103,6 @@ public class CarritoServiceIntegrationTest {
         carritoRepository.save(carritoEntity);
 
         CarritoDTO result = carritoService.eliminarUnidadDeProductoDelCarrito(idCarrito, productoSeleccionadoDto);
-        System.out.println(result.getCarritoProductos().size());
         assertThat(result.getEstado().getDescripcion()).isEqualTo("ABIERTO");
         assertThat(result.getCarritoProductos().get(0).getProducto().getDescripcion()).isEqualTo("IPHONE 15");
         assertThat(result.getCarritoProductos().size()).isEqualTo(1);

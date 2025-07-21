@@ -12,6 +12,8 @@ import com.challange.mapper.CarritoMapper;
 import com.challange.mapper.CarritoProductoMapper;
 import com.challange.repository.CarritoProductoRepository;
 import com.challange.repository.CarritoRepository;
+import com.challange.service.state.EstadoCarrito;
+import com.challange.service.state.EstadoCarritoFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
@@ -36,11 +38,13 @@ public class CarritoService {
     private ProductoService productoSvc;
     @Autowired
     private ProcesamientoService procesamientoSvc;
-
     @Autowired
     private CarritoMapper mapper;
     @Autowired
     private CarritoProductoMapper carritoProductoMapper;
+    @Autowired
+    private EstadoCarritoFactory estadoCarritoFactory;
+
     public CarritoDTO crearCarrito(Long idCliente) {
         CarritoEntity entity = new CarritoEntity();
         entity.setCliente(usuarioSvc.findById(idCliente));
@@ -58,90 +62,51 @@ public class CarritoService {
         List<CarritoEntity> entities = carritoDao.obtenerCarritosPorCliente(idCliente);
         return mapper.entitiesToDtos(entities);
     }
+
     public CarritoDTO agregarProductoACarrito(Long idCarrito, ProductoSeleccionadoDTO productoSeleccionado){
         CarritoEntity carritoEntity = this.findById(idCarrito);
-        if(carritoEntity.getEstado().getDescripcion().equals("PROCESADO"))
-            throw new RuntimeException("No se puede agregar productos a un carrito procesado");
 
-        //Construyo clave compuesta por id de carrito y id de producto
-        CarritoProductoId id = new CarritoProductoId(idCarrito, productoSeleccionado.getIdProducto());
+        EstadoCarrito estado = estadoCarritoFactory.obtenerEstado(carritoEntity.getEstado().getDescripcion());
 
-        //Luego construyo la entity
-        CarritoProductoEntity carritoProductoEntity = new CarritoProductoEntity();
-        ProductoEntity productoEntity = productoSvc.findById(productoSeleccionado.getIdProducto());
-        carritoProductoEntity.setId(id);
-        carritoProductoEntity.setCarrito(this.findById(idCarrito));
-        carritoProductoEntity.setProducto(productoEntity);
-        carritoProductoEntity.setCantidad(productoSeleccionado.getCantidad());
-        carritoProductoEntity.setEnPromocion(productoEntity.isEnPromocion());
-        //van a estar los precios sin descuento todavía
-        carritoProductoEntity.setSubtotal(productoEntity.getPrecio() * productoSeleccionado.getCantidad());
-        carritoProductoDao.save(carritoProductoEntity);
-
-        //Modifico el estado del carrito que ahora al tener un producto pasa a estar abierto
-        if (!carritoEntity.getCarritoProductos().isEmpty())
-            carritoEntity = this.actualizarEstadoDelCarrito(carritoEntity, ESTADO_ABIERTO);
-
-        return mapper.entityToDto(carritoEntity);
+        return mapper.entityToDto(estado.agregarProducto(carritoEntity, productoSeleccionado));
     }
 
     public MensajeDTO finalizarCarrito(Long idCarrito){
-        Thread procesoAsincrono = new Thread(() ->
-                procesamientoSvc.finalizarCarrito(idCarrito));
-        procesoAsincrono.start();
+        CarritoEntity carritoEntity = this.findById(idCarrito);
+
+        EstadoCarrito estado = estadoCarritoFactory.obtenerEstado(carritoEntity.getEstado().getDescripcion());
+        estado.finalizar(idCarrito);
         return new MensajeDTO(MensajeDTO.MENSAJE_PROCESO);
     }
+
     public CarritoDTO eliminarProductoDelCarrito(Long idCarrito, ProductoSeleccionadoDTO producto){
-        CarritoProductoId id = new CarritoProductoId(idCarrito, producto.getIdProducto());
-        try {
-            carritoProductoDao.deleteById(id);
-        }
-        catch (EmptyResultDataAccessException ex){
-            throw new EntityNotFoundException("No se encontró el producto " + producto.getIdProducto() +" para borrar del carrito " + idCarrito);
-        }
-        return mapper.entityToDto(this.findById(idCarrito));
+        CarritoEntity carritoEntity = this.findById(idCarrito);
+        EstadoCarrito estado = estadoCarritoFactory.obtenerEstado(carritoEntity.getEstado().getDescripcion());
+        carritoEntity = estado.eliminarProducto(carritoEntity, producto);
+        return mapper.entityToDto(carritoEntity);
     }
 
     public CarritoDTO eliminarUnidadDeProductoDelCarrito(Long idCarrito, ProductoSeleccionadoDTO producto){
         CarritoEntity carritoEntity = this.findById(idCarrito);
-        if(carritoEntity.getEstado().getDescripcion().equals("VACIO") || carritoEntity.getEstado().getDescripcion().equals("PROCESADO"))
-            throw new RuntimeException("No se puede borrar productos de un carrito vacio o procesado");
 
-        CarritoProductoId id = new CarritoProductoId(idCarrito, producto.getIdProducto());
-        CarritoProductoEntity carritoProductoEntity = carritoProductoDao.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("No se encontró CarritoProducto con id " + idCarrito + "-" + producto.getIdProducto()));
+        EstadoCarrito estado = estadoCarritoFactory.obtenerEstado(carritoEntity.getEstado().getDescripcion());
 
-        //Resto 1 unidad a la cantidad
-        Integer cantidad = carritoProductoEntity.getCantidad();
-
-
-        if (cantidad > 1) {
-            Double nuevoSubtotal = this.calcularNuevoSubtotal(cantidad, carritoProductoEntity.getSubtotal());
-            carritoProductoEntity.setCantidad(cantidad - 1);
-            carritoProductoEntity.setSubtotal(nuevoSubtotal);
-            carritoProductoDao.save(carritoProductoEntity);
-        } else {
-            this.eliminarProductoDelCarrito(idCarrito, producto);
-            carritoEntity.setEstado(carritoEstadoSvc.findById(ESTADO_VACIO));
-            carritoDao.save(carritoEntity);
-        }
-
-        return mapper.entityToDto(carritoEntity);
+        return mapper.entityToDto(estado.eliminarUnidadDeProducto(carritoEntity, producto));
     }
     public List<CarritoProductoDTO> obtenerTodosLosProductosDeUnCarrito(Long idCarrito){
         List<CarritoProductoEntity> productos = this.findById(idCarrito).getCarritoProductos();
         return carritoProductoMapper.entitiesToDtos(productos);
     }
 
-    public void guardarCarrito(CarritoEntity entity){
-        carritoDao.save(entity);
+    public CarritoEntity guardarCarrito(CarritoEntity entity){
+        return carritoDao.save(entity);
     }
 
-    private Double calcularNuevoSubtotal(Integer cantidad, double subtotalOriginal){
+    public Double calcularNuevoSubtotal(Integer cantidad, double subtotalOriginal){
         return subtotalOriginal - (subtotalOriginal / cantidad);
     }
 
-    private CarritoEntity actualizarEstadoDelCarrito(CarritoEntity entity, Long estado){
+    public CarritoEntity actualizarEstadoDelCarrito(CarritoEntity entity, Long estado){
         entity.setEstado(carritoEstadoSvc.findById(estado));
         return carritoDao.save(entity);
     }

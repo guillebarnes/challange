@@ -3,6 +3,8 @@ package com.challange.service;
 import com.challange.entity.CarritoEntity;
 import com.challange.entity.CarritoProductoEntity;
 import com.challange.repository.CarritoProductoRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +13,8 @@ import java.util.List;
 
 @Service
 public class ProcesamientoService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger( ProcesamientoService.class );
 
     private static Long ESTADO_PROCESADO = 2L;
     @Autowired
@@ -33,8 +37,7 @@ public class ProcesamientoService {
             carritoEntity.setEstado(estadoSvc.findById(ESTADO_PROCESADO));
             carritoSvc.guardarCarrito(carritoEntity);
         }catch (Exception e){
-            //TODO reempleazar sout con LOGGER
-            System.out.println("error: " + e.getMessage());
+            LOGGER.error("Ocurrio un error al procesar el carrito {}. Motivo: {}", idCarrito, e.getMessage());
         }
     }
     public List<CarritoProductoEntity> aplicarDescuentos(List<CarritoProductoEntity> productos){

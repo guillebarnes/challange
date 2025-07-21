@@ -82,6 +82,9 @@ public class CarritoController {
         try{
             return ResponseEntity.ok(carritoSvc.finalizarCarrito(idCarrito));
         }
+        catch (RuntimeException ex){
+            return ResponseEntity.ok(new MensajeDTO(ex.getMessage()));
+        }
         catch(Exception e){
             LOGGER.error("Error al procesar el carrito id {}: {}", idCarrito, e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();

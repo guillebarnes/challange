@@ -10,6 +10,8 @@ import com.challange.entity.id.CarritoProductoId;
 import com.challange.mapper.CarritoMapper;
 import com.challange.repository.CarritoProductoRepository;
 import com.challange.repository.CarritoRepository;
+import com.challange.service.state.EstadoCarrito;
+import com.challange.service.state.EstadoCarritoFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
@@ -37,6 +39,10 @@ class CarritoServiceTest {
     private CarritoMapper carritoMapper;
     @Mock
     private CarritoProductoRepository carritoProductoDao;
+    @Mock
+    private EstadoCarritoFactory estadoCarritoFactory;
+    @Mock
+    private EstadoCarrito estadoAbierto;
 
     @BeforeEach
     void setUp() {
@@ -113,7 +119,7 @@ class CarritoServiceTest {
         when(productoSvc.findById(idProducto)).thenReturn(productoMock);
         when(carritoRepository.findById(idCarrito)).thenReturn(Optional.of(carritoMock));
         when(carritoMapper.entityToDto(any())).thenReturn(carritoDtoMock);
-
+        when(estadoCarritoFactory.obtenerEstado("ABIERTO")).thenReturn(estadoAbierto);
         CarritoDTO result = carritoSvc.agregarProductoACarrito(idCarrito, productoSeleccionadoDTO);
 
         assertThat(result.getCarritoProductos().size()).isEqualTo(1);
@@ -167,7 +173,8 @@ class CarritoServiceTest {
         when(carritoMapper.entityToDto(carritoMock)).thenReturn(carritoDtoMock);
         when(productoSvc.findById(idProducto)).thenReturn(productoMock);
         when(carritoProductoDao.findById(new CarritoProductoId(idCarrito,idProducto))).thenReturn(Optional.of(carritoProductoEntityMock));
-
+        when(estadoCarritoFactory.obtenerEstado("ABIERTO")).thenReturn(estadoAbierto);
+        when(estadoAbierto.eliminarUnidadDeProducto(carritoMock, productoSeleccionadoDTO)).thenReturn(carritoMock);
         CarritoDTO result = carritoSvc.eliminarUnidadDeProductoDelCarrito(idCarrito, productoSeleccionadoDTO);
 
         assertThat(result.getCarritoProductos().size()).isEqualTo(1);
@@ -223,6 +230,8 @@ class CarritoServiceTest {
         when(carritoMapper.entityToDto(carritoMock)).thenReturn(carritoDtoMock);
         when(productoSvc.findById(idProducto)).thenReturn(productoMock);
         when(carritoProductoDao.findById(new CarritoProductoId(idCarrito,idProducto))).thenReturn(Optional.of(carritoProductoEntityMock));
+        when(estadoCarritoFactory.obtenerEstado("ABIERTO")).thenReturn(estadoAbierto);
+        when(estadoAbierto.eliminarUnidadDeProducto(carritoMock, productoSeleccionadoDTO)).thenReturn(carritoMock);
 
         CarritoDTO result = carritoSvc.eliminarUnidadDeProductoDelCarrito(idCarrito, productoSeleccionadoDTO);
 
@@ -245,9 +254,14 @@ class CarritoServiceTest {
         productoMock.setPrecio(100.0);
         productoMock.setEnPromocion(false);
 
+        EstadoCarritoEntity estadoCarritoEntity = new EstadoCarritoEntity();
+        estadoCarritoEntity.setId(1L);
+        estadoCarritoEntity.setDescripcion("ABIERTO");
+
         CarritoEntity carritoMock = new CarritoEntity();
         carritoMock.setCarritoId(idCarrito);
         carritoMock.setCarritoProductos(new ArrayList<>());
+        carritoMock.setEstado(estadoCarritoEntity);
 
         CarritoProductoEntity carritoProductoEntityMock = new CarritoProductoEntity();
         carritoProductoEntityMock.setId(new CarritoProductoId(idCarrito, idProducto));
@@ -262,20 +276,25 @@ class CarritoServiceTest {
 
         carritoMock.setCarritoProductos(carritoProductoEntityList);
 
+        EstadoCarritoDTO estadoCarritoDtoMock = new EstadoCarritoDTO();
+        estadoCarritoDtoMock.setDescripcion("VACIO");
         CarritoDTO carritoDtoMock = new CarritoDTO();
         carritoDtoMock.setCarritoId(idCarrito);
-
+        carritoDtoMock.setEstado(estadoCarritoDtoMock);
         carritoDtoMock.setCarritoProductos(new ArrayList<>());
 
         when(carritoRepository.findById(idCarrito)).thenReturn(Optional.of(carritoMock));
-        when(carritoMapper.entityToDto(carritoMock)).thenReturn(carritoDtoMock);
+        when(carritoMapper.entityToDto(any())).thenReturn(carritoDtoMock);
         when(productoSvc.findById(idProducto)).thenReturn(productoMock);
         when(carritoProductoDao.findById(new CarritoProductoId(idCarrito,idProducto))).thenReturn(Optional.of(carritoProductoEntityMock));
+        when(estadoCarritoFactory.obtenerEstado("ABIERTO")).thenReturn(estadoAbierto);
+        when(estadoAbierto.eliminarUnidadDeProducto(carritoMock, productoSeleccionadoDTO)).thenReturn(carritoMock);
 
         CarritoDTO result = carritoSvc.eliminarProductoDelCarrito(idCarrito, productoSeleccionadoDTO);
 
         assertThat(result.getCarritoProductos().size()).isEqualTo(0);
         assertThat(result.getCarritoProductos()).isEmpty();
+        assertThat(result.getEstado().getDescripcion()).isEqualTo("VACIO");
     }
 
 
