@@ -118,12 +118,12 @@
           </elementProp>
           <elementProp name="" elementType="Header">
             <stringProp name="Header.name">Authorization</stringProp>
-            <stringProp name="Header.value">Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJnaW5vIiwiY2xpZW50ZUlkIjoxLCJpYXQiOjE3NTMwMTc1NzUsImV4cCI6MTc1MzEwMzk3NX0.joPIXiu8JlprSlDcrjYkDnzArsiOP3yUnWnkpF-x_EYXxTWGk0ZaHlMUgy8292av9zqs2-min6gqrOMZ6TZ70A</stringProp>
+            <stringProp name="Header.value">Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJnaW5vIiwiY2xpZW50ZUlkIjoxLCJpYXQiOjE3NTMwOTc3ODEsImV4cCI6MTc1MzE4NDE4MX0.oKtpVgkUvkmaN16qHFye2hDsY-PZoo1DAy9jF5GcqmcyCxpthtKkv9pRGzmlU90wzr1RW5XIad4krj0x_tWiXA</stringProp>
           </elementProp>
         </collectionProp>
       </HeaderManager>
       <hashTree/>
-      <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="Ver Árbol de Resultados" enabled="true">
+      <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="Ver Árbol de Resultados">
         <boolProp name="ResultCollector.error_logging">false</boolProp>
         <objProp>
           <name>saveConfig</name>
